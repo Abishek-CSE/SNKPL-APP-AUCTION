@@ -5,7 +5,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
-const BACKEND_URL = 'http://localhost:5555';
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://snkpl-app-auction.onrender.com';
 
 export default function AdminDashboardScreen({ route, navigation }) {
   const { roomId } = route.params;
