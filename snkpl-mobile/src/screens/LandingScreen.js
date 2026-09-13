@@ -8,16 +8,20 @@ const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://snkpl-app-au
 
 export default function LandingScreen({ navigation }) {
   const [roomCode, setRoomCode] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const createRoom = async () => {
+    setLoading(true);
     try {
       const res = await axios.post(`${BACKEND_URL}/api/room/create`, { adminId: 'admin_user' });
       if (res.data.success) {
-        navigation.navigate('AdminDashboard', { roomId: res.data.roomId });
+        navigation.navigate('AdminDashboard', { roomId: res.data.room.roomId });
       }
     } catch (error) {
       console.error('Error creating room', error);
       alert('Failed to create room');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -43,7 +47,7 @@ export default function LandingScreen({ navigation }) {
         style={styles.settingsIcon} 
         onPress={() => navigation.navigate('Settings')}
       >
-        <Ionicons name="settings-outline" size={28} color="#0f172a" />
+        <Ionicons name="settings-outline" size={28} color="#F8FAFC" />
       </TouchableOpacity>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -61,9 +65,9 @@ export default function LandingScreen({ navigation }) {
             <Text style={styles.cardTitle}>Host an Auction</Text>
           </View>
           <Text style={styles.cardDesc}>Create a new room and manage players, teams, and live bidding.</Text>
-          <TouchableOpacity style={styles.createBtn} onPress={createRoom}>
+          <TouchableOpacity style={styles.createBtn} onPress={createRoom} disabled={loading}>
             <LinearGradient colors={['#4f46e5', '#6366f1']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.buttonGradient}>
-              <Text style={styles.btnText}>CREATE ROOM</Text>
+              <Text style={styles.btnText}>{loading ? 'CREATING...' : 'CREATE ROOM'}</Text>
               <Ionicons name="add-circle-outline" size={20} color="#fff" style={{ marginLeft: 8 }} />
             </LinearGradient>
           </TouchableOpacity>
@@ -104,7 +108,7 @@ export default function LandingScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#0F172A',
   },
   scrollContent: {
     padding: 24,
@@ -117,13 +121,15 @@ const styles = StyleSheet.create({
     right: 20,
     zIndex: 10,
     padding: 12,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1E293B',
     borderRadius: 25,
-    shadowColor: '#94a3b8',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.5,
     shadowRadius: 10,
     elevation: 5,
+    borderWidth: 1,
+    borderColor: '#334155'
   },
   logo: {
     width: 100,
@@ -131,33 +137,35 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#334155',
   },
   title: {
     fontSize: 42,
     fontWeight: '900',
-    color: '#0f172a',
+    color: '#F8FAFC',
     letterSpacing: 4,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
-    color: '#64748b',
+    color: '#94A3B8',
     textAlign: 'center',
     marginBottom: 40,
     letterSpacing: 1,
   },
   card: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1E293B',
     borderRadius: 24,
     padding: 30,
     width: '100%',
-    shadowColor: '#94a3b8',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.5,
     shadowRadius: 20,
     elevation: 10,
     marginBottom: 30,
+    borderWidth: 1,
+    borderColor: '#334155',
   },
   cardHeader: {
     flexDirection: 'row',
@@ -167,12 +175,12 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#0f172a',
+    color: '#F8FAFC',
     marginLeft: 10,
   },
   cardDesc: {
     fontSize: 14,
-    color: '#64748b',
+    color: '#94A3B8',
     marginBottom: 25,
     lineHeight: 20,
   },
@@ -180,7 +188,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 2,
-    borderColor: '#e2e8f0',
+    borderColor: '#334155',
     marginBottom: 25,
     paddingBottom: 5,
   },
@@ -190,7 +198,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 32,
-    color: '#0f172a',
+    color: '#F8FAFC',
     fontWeight: 'bold',
     letterSpacing: 8,
   },

@@ -40,6 +40,7 @@ mongoose.connect(MONGO_URI)
 const upload = multer({ storage: multer.memoryStorage() });
 
 // --- REST API ROUTES ---
+app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 // --- AUTHENTICATION ---
 app.post('/api/auth/register', async (req, res) => {
@@ -164,13 +165,75 @@ app.post('/api/players/upload/:roomId', upload.single('file'), async (req, res) 
   }
 });
 
+app.post('/api/teams/upload/:roomId', upload.single('file'), async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
+
+    const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    const teams = data.map(row => {
+      const getVal = (keys) => {
+        const foundKey = Object.keys(row).find(k => keys.includes(k.toLowerCase()));
+        return foundKey ? row[foundKey] : '';
+      };
+
+      let purseStr = getVal(['purse', 'budget', 'amount', 'balance'])?.toString()?.replace(/[^0-9.]/g, '') || '';
+      const purse = parseFloat(purseStr) || 10000;
+
+      return {
+        name: getVal(['name', 'team name', 'team']) || 'Unknown Team',
+        purse: purse,
+        players: [],
+        roomId: roomId
+      };
+    });
+
+    await Team.insertMany(teams);
+    res.status(201).json({ success: true, message: `${teams.length} teams uploaded` });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.post('/api/teams/budget/:roomId', async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const { budget } = req.body;
+    
+    const parsedBudget = parseFloat(budget);
+    if (isNaN(parsedBudget)) return res.status(400).json({ success: false, message: 'Invalid budget amount' });
+
+    await Team.updateMany({ roomId }, { $set: { purse: parsedBudget } });
+    
+    // Broadcast the updated state to everyone in the room
+    const players = await Player.find({ roomId });
+    const teams = await Team.find({ roomId });
+    io.to(roomId).emit('room_state', { players, teams });
+
+    res.json({ success: true, message: `All teams in room updated to ₹${parsedBudget}L` });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // --- SOCKET.IO LOGIC ---
+const activeRooms = {}; // { roomId: [{ socketId, userId, username }] }
+
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
-  socket.on('join_room', async ({ roomId, userId }) => {
+  socket.on('join_room', async ({ roomId, userId, username }) => {
     socket.join(roomId);
-    console.log(`User ${userId} joined room ${roomId}`);
+    socket.data = { roomId, userId, username: username || userId || 'Anonymous' };
+    console.log(`User ${socket.data.username} joined room ${roomId}`);
+    
+    if (!activeRooms[roomId]) activeRooms[roomId] = [];
+    activeRooms[roomId].push({ socketId: socket.id, userId, username: socket.data.username });
+    
+    io.to(roomId).emit('participants_updated', activeRooms[roomId]);
     
     // Fetch current state for this room and send to user
     const players = await Player.find({ roomId });
@@ -233,8 +296,72 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('admin_remove_player', async ({ roomId, playerId }) => {
+    try {
+      const player = await Player.findById(playerId);
+      if (!player || !player.sold) return;
+
+      const team = await Team.findById(player.teamId);
+      if (team) {
+        team.purse += player.soldPrice;
+        team.players = team.players.filter(pId => pId.toString() !== playerId);
+        await team.save();
+      }
+
+      player.sold = false;
+      player.teamId = null;
+      player.soldPrice = 0;
+      player.currentPrice = player.basePrice;
+      await player.save();
+
+      const players = await Player.find({ roomId });
+      const teams = await Team.find({ roomId });
+      io.to(roomId).emit('room_state', { players, teams });
+    } catch (error) {
+      console.error('Remove player error:', error);
+    }
+  });
+
+  socket.on('admin_transfer_player', async ({ roomId, playerId, newTeamId }) => {
+    try {
+      const player = await Player.findById(playerId);
+      if (!player || !player.sold) return;
+      if (player.teamId.toString() === newTeamId) return;
+
+      const oldTeam = await Team.findById(player.teamId);
+      const newTeam = await Team.findById(newTeamId);
+
+      if (!oldTeam || !newTeam) return;
+
+      // Refund old team
+      oldTeam.purse += player.soldPrice;
+      oldTeam.players = oldTeam.players.filter(pId => pId.toString() !== playerId);
+      await oldTeam.save();
+
+      // Deduct from new team
+      newTeam.purse -= player.soldPrice;
+      newTeam.players.push(player._id);
+      await newTeam.save();
+
+      // Update player
+      player.teamId = newTeam._id;
+      await player.save();
+
+      const players = await Player.find({ roomId });
+      const teams = await Team.find({ roomId });
+      io.to(roomId).emit('room_state', { players, teams });
+    } catch (error) {
+      console.error('Transfer error:', error);
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
+    const { roomId } = socket.data || {};
+    if (roomId && activeRooms[roomId]) {
+      activeRooms[roomId] = activeRooms[roomId].filter(u => u.socketId !== socket.id);
+      io.to(roomId).emit('participants_updated', activeRooms[roomId]);
+    }
   });
 });
 

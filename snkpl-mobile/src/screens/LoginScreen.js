@@ -25,6 +25,8 @@ export default function LoginScreen({ navigation }) {
         await AsyncStorage.setItem('userToken', res.data.token);
         await AsyncStorage.setItem('userData', JSON.stringify(res.data.user));
         navigation.replace('Landing');
+      } else {
+        Alert.alert('Login Error', res.data.message || 'Login failed');
       }
     } catch (error) {
       const msg = error.response?.data?.message || 'Login failed';
@@ -115,7 +117,7 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#0F172A',
   },
   background: {
     flex: 1,
@@ -134,38 +136,40 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 45,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#334155',
   },
   title: {
     fontSize: 42,
     fontWeight: '900',
-    color: '#0f172a',
+    color: '#F8FAFC',
     textAlign: 'center',
     letterSpacing: 4,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
-    color: '#64748b',
+    color: '#94A3B8',
     textAlign: 'center',
     marginBottom: 40,
     letterSpacing: 1,
   },
   card: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1E293B',
     borderRadius: 24,
     padding: 30,
-    shadowColor: '#94a3b8',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.5,
     shadowRadius: 20,
     elevation: 10,
+    borderWidth: 1,
+    borderColor: '#334155',
   },
   inputWrapper: {
     marginBottom: 25,
   },
   inputLabel: {
-    color: '#4f46e5',
+    color: '#818CF8',
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 2,
@@ -175,7 +179,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#334155',
   },
   inputIcon: {
     marginRight: 10,
@@ -184,7 +188,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     fontSize: 18,
-    color: '#0f172a',
+    color: '#F8FAFC',
   },
   eyeButton: {
     padding: 10,
@@ -216,11 +220,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   linkText: {
-    color: '#64748b',
+    color: '#94A3B8',
     fontSize: 14,
   },
   linkTextBold: {
-    color: '#4f46e5',
+    color: '#818CF8',
     fontWeight: '700',
   }
 });

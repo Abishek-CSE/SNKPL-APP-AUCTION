@@ -59,7 +59,7 @@ export default function SettingsScreen({ navigation }) {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1, padding: 24, paddingTop: 60 }}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Account Settings</Text>
           <Text style={styles.headerSubtitle}>Manage your profile and security</Text>
@@ -124,7 +124,7 @@ export default function SettingsScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#0F172A',
   },
   scrollContent: {
     padding: 24,
@@ -136,30 +136,32 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 32,
     fontWeight: '900',
-    color: '#0f172a',
+    color: '#F8FAFC',
     letterSpacing: 1,
     marginBottom: 8,
   },
   headerSubtitle: {
     fontSize: 15,
-    color: '#64748b',
+    color: '#94A3B8',
   },
   card: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1E293B',
     borderRadius: 24,
     padding: 30,
-    shadowColor: '#94a3b8',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.5,
     shadowRadius: 20,
     elevation: 10,
     marginBottom: 30,
+    borderWidth: 1,
+    borderColor: '#334155',
   },
   inputWrapper: {
     marginBottom: 25,
   },
   inputLabel: {
-    color: '#4f46e5',
+    color: '#818CF8',
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 2,
@@ -169,7 +171,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#334155',
   },
   inputIcon: {
     marginRight: 10,
@@ -178,7 +180,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     fontSize: 18,
-    color: '#0f172a',
+    color: '#F8FAFC',
   },
   saveBtn: {
     marginTop: 10,

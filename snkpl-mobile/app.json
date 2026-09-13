@@ -4,7 +4,7 @@
     "slug": "snkpl-auction",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/favicon.png",
+    "icon": "./assets/logo.jpeg",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true
@@ -13,7 +13,7 @@
       "package": "com.abishek_0510.snkplauction"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/logo.jpeg"
     },
     "extra": {
       "eas": {
