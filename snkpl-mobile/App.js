@@ -67,7 +67,7 @@ export default function App() {
         <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Landing" component={LandingScreen} options={{ headerShown: false }} />
         <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} options={{ title: 'Admin Dashboard' }} />
-        <Stack.Screen name="LiveAuction" component={LiveAuctionScreen} options={{ title: 'Live Auction', headerLeft: null }} />
+        <Stack.Screen name="LiveAuction" component={LiveAuctionScreen} options={{ title: 'Live Auction', headerLeft: () => null }} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
       </Stack.Navigator>
     </NavigationContainer>
