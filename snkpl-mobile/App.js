@@ -20,7 +20,7 @@ export default function App() {
 
   useEffect(() => {
     // Eagerly wake up the backend server (Render free tier cold start prevention)
-    axios.get(`${BACKEND_URL}/api/health`).catch(() => {});
+    axios.get(`${BACKEND_URL}/api/health`).catch(() => { });
 
     const checkLoginStatus = async () => {
       try {
@@ -34,7 +34,7 @@ export default function App() {
         setInitialRoute('Login');
       }
     };
-    
+
     checkLoginStatus();
   }, []);
 
@@ -48,17 +48,17 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator 
+      <Stack.Navigator
         initialRouteName={initialRoute}
         screenOptions={{
-          headerStyle: { 
-            backgroundColor: '#0F172A', 
+          headerStyle: {
+            backgroundColor: '#0F172A',
             elevation: 0, // remove shadow on Android
             shadowOpacity: 0, // remove shadow on iOS
             borderBottomWidth: 0,
           },
           headerTintColor: '#F8FAFC',
-          headerTitleStyle: { 
+          headerTitleStyle: {
             fontWeight: 'bold',
           },
         }}
